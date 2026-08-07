@@ -3,6 +3,7 @@
  * POST /api/exams/access - Access exam using code
  */
 
+import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { logger } from '@/lib/logger'
@@ -10,6 +11,7 @@ import { logger } from '@/lib/logger'
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
+    const adminClient = createAdminClient()
 
     // Check authentication
     const {
@@ -29,8 +31,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Find exam by code
-    const { data: exam, error: examError } = await supabase
+    // Use admin client so exam lookup is not blocked by outdated RLS
+    // (legacy policy checked students.course_id instead of student_courses)
+    const { data: exam, error: examError } = await adminClient
       .from('exams')
       .select(`
         *,
@@ -47,7 +50,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get student profile
-    const { data: student } = await supabase
+    const { data: student } = await adminClient
       .from('students')
       .select('id')
       .eq('user_id', user.id)
@@ -61,7 +64,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if student is enrolled in the course and has paid
-    const { data: enrollment, error: enrollmentError } = await supabase
+    const { data: enrollment, error: enrollmentError } = await adminClient
       .from('student_courses')
       .select('id, payment_status')
       .eq('student_id', student.id)
@@ -87,7 +90,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if student has already taken this exam
-    const { data: existingScore } = await supabase
+    const { data: existingScore } = await adminClient
       .from('scores')
       .select('id')
       .eq('student_id', student.id)

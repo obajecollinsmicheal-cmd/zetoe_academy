@@ -220,6 +220,21 @@ export async function POST(request: NextRequest) {
       // Don't fail the request if payment was recorded
     }
 
+    // Keep legacy students.course_id / payment_status in sync for older RLS policies
+    const { error: legacyError } = await adminClient
+      .from('students')
+      .update({
+        course_id,
+        payment_status: 'paid',
+      })
+      .eq('id', student_id)
+
+    if (legacyError) {
+      logger.warn('Failed to sync legacy student course fields after payment', {
+        context: { student_id, course_id, error: legacyError.message },
+      })
+    }
+
     return NextResponse.json(
       {
         message: 'Payment recorded successfully',
