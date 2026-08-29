@@ -94,18 +94,19 @@ const Page = () => {
 
       setStudent(meData.profile)
 
-      // Fetch available exams for all enrolled courses
+      // Fetch available exams for paid enrolled courses
       if (meData.profile?.enrollments && meData.profile.enrollments.length > 0) {
         const uniqueCourseIds = Array.from(
           new Set(
             meData.profile.enrollments
-              .map((enrollment: StudentEnrollment) => enrollment.course?.id)
+              .filter((enrollment: StudentEnrollment) => enrollment.payment_status === 'paid')
+              .map((enrollment: StudentEnrollment) => enrollment.course_id || enrollment.course?.id)
               .filter(Boolean)
           )
         )
 
         const examResponses = await Promise.all(
-          uniqueCourseIds.map((courseId) => fetch(`/api/exams?courseId=${courseId}`))
+          uniqueCourseIds.map((courseId) => fetch(`/api/exams?course_id=${courseId}`))
         )
 
         const allExams: Exam[] = []

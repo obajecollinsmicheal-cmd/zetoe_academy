@@ -149,6 +149,22 @@ CREATE POLICY "Students can enroll themselves"
     )
   );
 
+-- Update exams RLS to use student_courses (multi-course) instead of legacy students.course_id
+DROP POLICY IF EXISTS "Students can view course exams" ON exams;
+
+CREATE POLICY "Students can view course exams"
+  ON exams FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1
+      FROM students s
+      JOIN student_courses sc ON sc.student_id = s.id
+      WHERE s.user_id = auth.uid()
+        AND sc.course_id = exams.course_id
+        AND sc.payment_status = 'paid'
+    )
+  );
+
 -- ============================================
 -- STEP 5: Create Helper Functions
 -- ============================================

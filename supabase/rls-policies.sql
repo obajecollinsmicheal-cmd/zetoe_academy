@@ -142,13 +142,18 @@ CREATE POLICY "Super admins can delete admins"
 -- ============================================
 -- EXAMS POLICIES
 -- ============================================
--- Students enrolled in the course can view exams
+-- Students enrolled (and paid) in the course can view exams
+-- Uses student_courses junction table (multi-course), not legacy students.course_id
 CREATE POLICY "Students can view course exams"
   ON exams FOR SELECT
   USING (
     EXISTS (
-      SELECT 1 FROM students
-      WHERE user_id = auth.uid() AND course_id = exams.course_id
+      SELECT 1
+      FROM students s
+      JOIN student_courses sc ON sc.student_id = s.id
+      WHERE s.user_id = auth.uid()
+        AND sc.course_id = exams.course_id
+        AND sc.payment_status = 'paid'
     )
   );
 

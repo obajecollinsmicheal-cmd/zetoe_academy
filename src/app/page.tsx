@@ -255,8 +255,9 @@ const Page = () => {
             Partner with us to tackle your unique challenges and unlock your organization’s full potential.
           </p>
             <p className="mt-3 text-sm">North West Zone: No 6 Sabr Plaza Station, Kachia Road</p>
-            <p className="mt-1 text-sm">Email: info@zeteoconsult.ng 
-              <br></br>• Phone: +234 800 000 0000</p>
+            <p className="mt-1 text-sm">Email: zeteocitadel08@gmail.com
+              <br></br>• Phone: 08064691255
+              </p>
           </div>
 
           <div>
@@ -290,7 +291,7 @@ const Page = () => {
              <img src="/instag.png" className=' w-7 ' alt="logo" /> instagram
             </a>
             <br />
-            <a href="#" className=" flex gap-3 hover:text-white transition">
+            <a href="https://web.facebook.com/Zeteocitadel" className=" flex gap-3 hover:text-white transition">
               <img src="/facebook.png" className=' w-7 ' alt="logo" />facebook
             </a>
             <br />

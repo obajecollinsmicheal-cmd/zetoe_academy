@@ -109,6 +109,27 @@ export async function PUT(
       )
     }
 
+    // Keep legacy students.course_id / payment_status in sync for older RLS policies
+    if (payment_status === 'paid') {
+      const { error: legacyError } = await adminClient
+        .from('students')
+        .update({
+          course_id: existing.course_id,
+          payment_status: 'paid',
+        })
+        .eq('id', existing.student_id)
+
+      if (legacyError) {
+        logger.warn('Failed to sync legacy student course fields', {
+          context: {
+            student_id: existing.student_id,
+            course_id: existing.course_id,
+            error: legacyError.message,
+          },
+        })
+      }
+    }
+
     logger.info(`Enrollment ${enrollmentId} updated: payment status ${existing.payment_status} → ${payment_status}`)
 
     return NextResponse.json(
